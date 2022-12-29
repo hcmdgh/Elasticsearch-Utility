@@ -16,11 +16,13 @@ __all__ = [
 
 class ESIndex:
     def __init__(self,
-                 client_config: dict[str, Any],
+                 host: str, 
+                 port: int,
+                 auth: Optional[tuple], 
                  index_name: str) -> None:
-        self.host = client_config['host'] 
-        self.port = client_config['port']
-        self.auth = client_config['auth']
+        self.host = host  
+        self.port = port 
+        self.auth = auth 
         self.index_name = index_name 
 
     def count(self) -> int:
@@ -36,7 +38,6 @@ class ESIndex:
             raise IndexNotExistError
         else:
             raise UnknownError(resp_json)
-
 
     def create_mapping(self,
                        mapping: dict[str, int],
@@ -91,7 +92,6 @@ class ESIndex:
         else:
             raise UnknownError(resp_json)
     
-    
     def delete_index(self) -> bool:
         resp = requests.delete(
             url = f"http://{self.host}:{self.port}/{self.index_name}",
@@ -105,7 +105,6 @@ class ESIndex:
             return False 
         else:
             raise UnknownError(resp_json)
-
     
     def insert(self,
                document: dict[str, Any]) -> str:
@@ -136,12 +135,12 @@ class ESIndex:
                 return resp_json['_id'] 
             else:
                 raise UnknownError(resp_json)
-        
     
     def query_by_id(self,
-                    _id: Any) -> Optional[dict[str, Any]]:
+                    id: Any,
+                    type: str = '_doc') -> Optional[dict[str, Any]]:
         resp = requests.get(
-            url = f"http://{self.host}:{self.port}/{self.index_name}/_doc/{_id}",
+            url = f"http://{self.host}:{self.port}/{self.index_name}/{type}/{id}",
             auth = self.auth, 
         )           
         resp_json = resp.json()
@@ -152,7 +151,6 @@ class ESIndex:
             return None 
         else:
             raise UnknownError(resp_json)
-
     
     def bulk_insert(self,
                     entry_sequence: Iterable[dict[str, Any]],

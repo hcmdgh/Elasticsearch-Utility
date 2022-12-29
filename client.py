@@ -27,11 +27,9 @@ class ESClient:
     def get_index(self,
                   index_name: str) -> ESIndex:
         return ESIndex(
-            client_config = dict(
-                host = self.host, 
-                port = self.port, 
-                auth = self.auth, 
-            ), 
+            host = self.host, 
+            port = self.port, 
+            auth = self.auth, 
             index_name = index_name, 
         )
 
