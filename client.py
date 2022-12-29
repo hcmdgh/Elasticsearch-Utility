@@ -25,12 +25,14 @@ class ESClient:
             self.auth = None  
         
     def get_index(self,
-                  index_name: str) -> ESIndex:
+                  index_name: str,
+                  type_name: str = '_doc') -> ESIndex:
         return ESIndex(
             host = self.host, 
             port = self.port, 
             auth = self.auth, 
             index_name = index_name, 
+            type_name = type_name, 
         )
 
     def test_connection(self):

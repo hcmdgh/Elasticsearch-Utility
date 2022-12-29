@@ -19,11 +19,13 @@ class ESIndex:
                  host: str, 
                  port: int,
                  auth: Optional[tuple], 
-                 index_name: str) -> None:
+                 index_name: str,
+                 type_name: str = '_doc') -> None:
         self.host = host  
         self.port = port 
         self.auth = auth 
         self.index_name = index_name 
+        self.type_name = type_name 
 
     def count(self) -> int:
         resp = requests.get(
@@ -112,7 +114,7 @@ class ESIndex:
             _id = str(document.pop('_id'))
             
             resp = requests.put(
-                url = f"http://{self.host}:{self.port}/{self.index_name}/_doc/{_id}",
+                url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/{_id}",
                 json = document, 
                 auth = self.auth, 
             )           
@@ -125,7 +127,7 @@ class ESIndex:
 
         else:
             resp = requests.post(
-                url = f"http://{self.host}:{self.port}/{self.index_name}/_doc",
+                url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}",
                 json = document, 
                 auth = self.auth, 
             )           
@@ -137,10 +139,9 @@ class ESIndex:
                 raise UnknownError(resp_json)
     
     def query_by_id(self,
-                    id: Any,
-                    type: str = '_doc') -> Optional[dict[str, Any]]:
+                    id: Any) -> Optional[dict[str, Any]]:
         resp = requests.get(
-            url = f"http://{self.host}:{self.port}/{self.index_name}/{type}/{id}",
+            url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/{id}",
             auth = self.auth, 
         )           
         resp_json = resp.json()
@@ -149,6 +150,36 @@ class ESIndex:
             return resp_json['_source']
         elif resp_json.get('found') == False:
             return None 
+        else:
+            raise UnknownError(resp_json)
+        
+    def query_X_eq_x(self,
+                     X: str,
+                     x: Any,
+                     limit: int = 10000) -> list[dict[str, Any]]:
+        resp = requests.get(
+            url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/_search",
+            auth = self.auth, 
+            json = {
+                'query': {
+                    'match': {
+                        X: x, 
+                    }
+                },
+                'size': limit, 
+            },
+        )           
+        resp_json = resp.json()
+        
+        if 'hits' in resp_json:
+            entry_list = [] 
+            
+            for item in resp_json['hits']['hits']:
+                entry = item['_source']
+                entry['_id'] = item['_id']
+                entry_list.append(entry)
+                
+            return entry_list
         else:
             raise UnknownError(resp_json)
     
