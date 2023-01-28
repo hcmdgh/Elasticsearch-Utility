@@ -182,8 +182,41 @@ class ESIndex:
             return entry_list
         else:
             raise UnknownError(resp_json)
-    
+        
     def bulk_insert(self,
+                    entry_list: list[dict[str, Any]]):
+        if not entry_list:
+            return 
+        
+        batch_json = ''
+        
+        for entry in entry_list:
+            if '_id' in entry: 
+                _id = str(entry.pop('_id')) 
+            else:
+                _id = None 
+            
+            if _id:
+                batch_json += json_dump({ 'index': { '_index': self.index_name, '_id': _id } }) + '\n'
+            else:
+                batch_json += json_dump({ 'index': { '_index': self.index_name } }) + '\n'
+                
+            batch_json += json_dump(entry) + '\n'
+            
+        resp = requests.post(
+            url = f"http://{self.host}:{self.port}/_bulk",
+            headers = { 'Content-Type': 'application/json' }, 
+            data = batch_json.encode('utf-8'), 
+            auth = self.auth, 
+        )           
+        resp_json = resp.json()
+        
+        if resp_json.get('errors') == False:
+            pass 
+        else:
+            raise UnknownError(resp_json)
+    
+    def bulk_insert_old(self,
                     entry_sequence: Iterable[dict[str, Any]],
                     batch_size: int = 10000,
                     use_tqdm: bool = True,
