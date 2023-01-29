@@ -197,9 +197,15 @@ class ESIndex:
                 _id = None 
             
             if _id:
-                batch_json += json_dump({ 'index': { '_index': self.index_name, '_id': _id } }) + '\n'
+                if self.type_name == '_doc':
+                    batch_json += json_dump({ 'index': { '_index': self.index_name, '_id': _id } }) + '\n'
+                else:
+                    batch_json += json_dump({ 'index': { '_index': self.index_name, '_type': self.type_name, '_id': _id } }) + '\n'
             else:
-                batch_json += json_dump({ 'index': { '_index': self.index_name } }) + '\n'
+                if self.type_name == '_doc':
+                    batch_json += json_dump({ 'index': { '_index': self.index_name } }) + '\n'
+                else:
+                    batch_json += json_dump({ 'index': { '_index': self.index_name, '_type': self.type_name } }) + '\n'
                 
             batch_json += json_dump(entry) + '\n'
             
