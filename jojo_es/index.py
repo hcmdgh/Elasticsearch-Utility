@@ -183,6 +183,36 @@ class ESIndex:
         else:
             raise UnknownError(resp_json)
         
+    def query_X_in_x(self,
+                     X: str,
+                     x: Iterable[Any],
+                     limit: int = 10000) -> list[dict[str, Any]]:
+        resp = requests.get(
+            url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/_search",
+            auth = self.auth, 
+            json = {
+                'query': {
+                    'terms': {
+                        X: list(x), 
+                    }
+                },
+                'size': limit, 
+            },
+        )           
+        resp_json = resp.json()
+        
+        if 'hits' in resp_json:
+            entry_list = [] 
+            
+            for item in resp_json['hits']['hits']:
+                entry = item['_source']
+                entry['_id'] = item['_id']
+                entry_list.append(entry)
+                
+            return entry_list
+        else:
+            raise UnknownError(resp_json)
+        
     def bulk_insert(self,
                     entry_list: list[dict[str, Any]]):
         if not entry_list:
