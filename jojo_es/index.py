@@ -247,7 +247,40 @@ class ESIndex:
             return entry_list
         else:
             raise UnknownError(resp_json)
+        
+    def scroll(self,
+               scroll_size: int = 1000,
+               scroll_time: str = '5m',
+               log_scroll_id: bool = False) -> Iterable[dict[str, Any]]:
+        query = { 'query': { 'match_all': {} } }
+        search_url = f"http://{self.host}:{self.port}/{self.index_name}/_search?scroll={scroll_time}&size={scroll_size}"
+        scroll_url = f"http://{self.host}:{self.port}/_search/scroll?scroll={scroll_time}"
+        
+        resp = requests.post(url=search_url, json=query)
+        resp_json = resp.json()
+
+        scroll_id = resp_json['_scroll_id'].strip() 
+
+        while True:
+            hits = resp_json["hits"]["hits"]
+
+            if not hits:
+                break 
             
+            for hit in hits:
+                entry = hit['_source']
+                entry['_id'] = hit['_id']
+                
+                yield entry 
+
+            resp = requests.post(url=scroll_url, json={ 'scroll_id': scroll_id })
+            resp_json = resp.json() 
+
+            scroll_id = resp_json['_scroll_id'].strip()
+            
+            if log_scroll_id:
+                print(f"scroll id: {scroll_id}") 
+
     def bulk_insert(self,
                     entry_list: list[dict[str, Any]]):
         if not entry_list:
