@@ -72,6 +72,13 @@ class ESIndex:
                 }
             elif v == BOOLEAN:
                 properties[k] = { 'type': 'boolean' }
+            elif v == DENSE_VECTOR_768:
+                properties[k] = { 
+                    'type': 'dense_vector', 
+                    'dims': 768,
+                    'index': True, 
+                    'similarity': 'l2_norm',
+                }
             else:
                 raise TypeError
 
