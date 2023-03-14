@@ -6,6 +6,7 @@ __all__ = [
     'DOUBLE',
     'KEYWORD_TEXT',
     'BOOLEAN',
+    'DENSE_VECTOR_768', 
 ]
 
 KEYWORD = 0
@@ -15,3 +16,4 @@ INTEGER = 3
 DOUBLE = 4 
 KEYWORD_TEXT = 5 
 BOOLEAN = 6 
+DENSE_VECTOR_768 = 7 
