@@ -160,6 +160,33 @@ class ESIndex:
         else:
             raise UnknownError(resp_json)
         
+    def query_id_in_x(self, 
+                      x: Iterable[Any]) -> list[dict[str, Any]]:
+        resp = requests.get(
+            url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/_search",
+            auth = self.auth, 
+            json = {
+                'query': {
+                    'ids': {
+                        'values': list(x)
+                    }
+                }    
+            },
+        )           
+        resp_json = resp.json()
+        
+        if 'hits' in resp_json:
+            entry_list = [] 
+            
+            for item in resp_json['hits']['hits']:
+                entry = item['_source']
+                entry['_id'] = item['_id']
+                entry_list.append(entry)
+                
+            return entry_list
+        else:
+            raise UnknownError(resp_json)
+        
     def query_X_eq_x(self,
                      X: str,
                      x: Any,
