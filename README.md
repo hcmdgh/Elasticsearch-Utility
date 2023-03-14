@@ -1,4 +1,4 @@
 # JOJO-Elasticsearch
 
-An all-in-one toolbox for Elasticsearch.
+A Python toolbox for Elasticsearch.
 
