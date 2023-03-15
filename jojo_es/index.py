@@ -26,6 +26,14 @@ class ESIndex:
         self.auth = auth 
         self.index_name = index_name 
         self.type_name = type_name 
+        
+    def exists(self) -> bool:
+        try:
+            self.count() 
+        except IndexNotExistError:
+            return False 
+        else:
+            return True 
 
     def count(self) -> int:
         resp = requests.get(
@@ -72,6 +80,8 @@ class ESIndex:
                 }
             elif v == BOOLEAN:
                 properties[k] = { 'type': 'boolean' }
+            elif v == DATE:
+                properties[k] = { 'type': 'date' }
             elif v == DENSE_VECTOR_768:
                 properties[k] = { 
                     'type': 'dense_vector', 

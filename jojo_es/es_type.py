@@ -6,6 +6,7 @@ __all__ = [
     'DOUBLE',
     'KEYWORD_TEXT',
     'BOOLEAN',
+    'DATE', 
     'DENSE_VECTOR_768', 
 ]
 
@@ -16,4 +17,5 @@ INTEGER = 3
 DOUBLE = 4 
 KEYWORD_TEXT = 5 
 BOOLEAN = 6 
-DENSE_VECTOR_768 = 7 
+DATE = 7 
+DENSE_VECTOR_768 = 8 
