@@ -171,7 +171,8 @@ class ESIndex:
             raise UnknownError(resp_json)
         
     def query_id_in_x(self, 
-                      x: Iterable[Any]) -> list[dict[str, Any]]:
+                      x: Iterable[Any],
+                      limit: int = 10000) -> list[dict[str, Any]]:
         resp = requests.get(
             url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/_search",
             auth = self.auth, 
@@ -180,7 +181,8 @@ class ESIndex:
                     'ids': {
                         'values': list(x)
                     }
-                }    
+                }, 
+                'size': limit, 
             },
         )           
         resp_json = resp.json()
