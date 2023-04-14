@@ -81,7 +81,7 @@ class ESIndex:
             elif v == BOOLEAN:
                 properties[k] = { 'type': 'boolean' }
             elif v == DATE:
-                properties[k] = { 'type': 'date' }
+                properties[k] = { 'type': 'date', 'format': 'yyyy-MM-dd HH:mm:ss' }
             elif v == DENSE_VECTOR_768:
                 properties[k] = { 
                     'type': 'dense_vector', 
@@ -137,7 +137,7 @@ class ESIndex:
             )           
             resp_json = resp.json()
             
-            if resp_json.get('result') == 'created':
+            if resp_json.get('result') in ['created', 'updated']:
                 return _id  
             else:
                 raise UnknownError(resp_json)
@@ -154,6 +154,21 @@ class ESIndex:
                 return resp_json['_id'] 
             else:
                 raise UnknownError(resp_json)
+            
+    def update_by_id(self,
+                     _id: Any, 
+                     **kwargs):
+        resp = requests.post(
+            url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/{_id}/_update",
+            json = { 'doc': kwargs }, 
+            auth = self.auth, 
+        )           
+        resp_json = resp.json()
+        
+        if resp_json.get('result') in ['created', 'updated']:
+            pass 
+        else:
+            raise UnknownError(resp_json)
     
     def query_by_id(self,
                     id: Any) -> Optional[dict[str, Any]]:
@@ -167,6 +182,21 @@ class ESIndex:
             return resp_json['_source']
         elif resp_json.get('found') == False:
             return None 
+        else:
+            raise UnknownError(resp_json)
+        
+    def delete_by_id(self,
+                    id: Any) -> bool:
+        resp = requests.delete(
+            url = f"http://{self.host}:{self.port}/{self.index_name}/{self.type_name}/{id}",
+            auth = self.auth, 
+        )           
+        resp_json = resp.json()
+        
+        if resp_json.get('result') == 'deleted':
+            return True
+        elif resp_json.get('result') == 'not_found':
+            return False 
         else:
             raise UnknownError(resp_json)
         
@@ -480,3 +510,15 @@ class ESIndex:
                 
         if batch_cnt > 0:
             send_batch_json(batch_json)
+
+    def flush(self):
+        resp = requests.post(
+            url = f"http://{self.host}:{self.port}/{self.index_name}/_flush",
+            auth = self.auth, 
+        )           
+        resp_json = resp.json() 
+
+        if resp.status_code == 200:
+            pass 
+        else:
+            raise UnknownError(resp_json)
