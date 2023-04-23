@@ -137,7 +137,7 @@ class ESIndex:
             )           
             resp_json = resp.json()
             
-            if resp_json.get('result') in ['created', 'updated']:
+            if resp_json.get('result') in ['created', 'updated', 'noop']:
                 return _id  
             else:
                 raise UnknownError(resp_json)
@@ -165,7 +165,7 @@ class ESIndex:
         )           
         resp_json = resp.json()
         
-        if resp_json.get('result') in ['created', 'updated']:
+        if resp_json.get('result') in ['created', 'updated', 'noop']:
             pass 
         else:
             raise UnknownError(resp_json)
